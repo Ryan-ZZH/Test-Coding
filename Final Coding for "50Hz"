@@ -1,0 +1,74 @@
+/*
+ * Written by Ryan Zhang. 
+ *
+ * The main components of this program including, 
+   
+   1 Adruino Uno board;
+   1 Decibel Sensor (LM386);   
+   1 Servomotor (MG945).
+ *
+ * Circuit,
+   
+   Hook up the AOUT of the Decibel Sensor to Analog Input A0, DOUT to Digital Input 2;
+   Hook up the VCC of the Decibel Sensor to 5V, GND to GND;
+   Hook up the out of the Servomotor to Analog output ~6;
+   Hook up the Red Line of the Servomotor to 5V, Brown Line to GND.
+ *  
+ * Intened Effect 
+   
+   When we make some noise (talking, singing and so on)，the Decibel Sensor can recognize this analog signal;   
+   Then via the Adruino UNO Board, this signal input to the Servomotor;  
+   With the sound level changing, the Servomotor can control the installation to rotate at a different Angle;  
+   And then it will revert to the original Angle. 
+ */
+
+#include <Servo.h>
+  Servo Top ;
+  
+  int TopPos=0;
+  const int TopMin = 0;
+  const int TopMax = 180;
+  
+  int sound_din=2; 
+  int sound_ain=A0; 
+  int ad_value;
+  
+void setup() {
+      
+  Top.attach(6); 
+  delay(200); 
+  pinMode(sound_din,INPUT); 
+  pinMode(sound_ain,INPUT); 
+  Serial.begin(9600);   
+}
+
+void loop() {
+  
+  int toPos; 
+  int fromPos;  
+  ad_value=analogRead(sound_ain); 
+  
+  if(digitalRead(sound_din)==LOW) 
+  {   
+    Serial.println("Noise!");
+    Serial.println(ad_value);     
+    int turnAngle = analogRead(sound_ain);  
+    toPos = map(turnAngle, 0, 1023, 0, 180);   
+    Serial.println(toPos); 
+    
+    if (fromPos <= toPos){ 
+        for (int i=fromPos; i<=toPos; i++){
+          Top.write(i);
+          delay(30);
+        }       
+        delay(1000);        
+        if(fromPos >= 0){
+           for (int g=fromPos; g >= 0; g--){
+             Top.write(g);
+             delay(30);
+        }} }       
+   }else{   
+    Serial.println("Quiet!");
+   }
+   delay(15);
+ } 
